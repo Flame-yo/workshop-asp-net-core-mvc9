@@ -1,5 +1,7 @@
-﻿using SalesWebMvc9.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using SalesWebMvc9.Data;
 using SalesWebMvc9.Models;
+using SalesWebMvc9.Services.Exceptions;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -25,9 +27,9 @@ namespace SalesWebMvc9.Services
             _context.SaveChanges();
         }
 
-        public Seller FindById(int? id)
+        public Seller FindById(int id)
         {
-            return _context.Seller.FirstOrDefault(x => x.Id == id);
+            return _context.Seller.Include(x => x.Department).FirstOrDefault(x => x.Id == id);
         }
 
         public void Remove(int id)
@@ -35,6 +37,23 @@ namespace SalesWebMvc9.Services
             Seller seller = _context.Seller.Find(id);
             _context.Seller.Remove(seller);
             _context.SaveChanges();
+        }
+
+        public void Update(int id)
+        {
+            if (!_context.Seller.Any(x => x.Id == id))
+            {
+                throw new NotFoundException("Id not found");
+            }
+            try
+            {
+                _context.Update(id);
+                _context.SaveChanges();
+            }
+            catch (DbUpdateConcurrencyException e)
+            {
+                throw new DbConcurrencyException(e.Message);
+            }
         }
     }
 }
