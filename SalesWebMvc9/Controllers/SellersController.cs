@@ -105,7 +105,7 @@ namespace SalesWebMvc9.Controllers
             }
             try
             {
-                _sellerService.Update(id);
+                _sellerService.Update(seller);
                 return RedirectToAction(nameof(Index));
             }
             catch (NotFoundException)
